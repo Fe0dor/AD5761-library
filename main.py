@@ -1,6 +1,7 @@
 from spidev import SpiDev
 import RPi.GPIO as GPIO
 
+# Open SPI port
 spi = SpiDev()
 spi.open(0, 0)
 spi.mode = 0b10
@@ -49,14 +50,14 @@ class AD6761:
 	def __del__(self):
 		self.softwareFullReset()
 		
-	def xferToDAC(self, regAddr, regData):
+	def xferToDAC(self, regAddr, regData): # method using as private to transfer data do DAC. spidev using only here
 		GPIO.output(self.CSpin, GPIO.LOW)
 		# first 4 bits in 0x0F don't care
 		readData = spi.xfer([0x0F & regAddr] + regData)
 		GPIO.output(self.CSpin, GPIO.HIGH)
 		return readData[1:]
 		
-	def printBytes(self, reg):
+	def printBytes(self, reg): # comfortable print
 		for i in reg:
 			print(bin(i)[2:].zfill(8), end=' ')
 		print(' ')
@@ -85,7 +86,7 @@ class AD6761:
 		return self.xferToDAC(0b1100, [0xFF, 0xFF])
 
 
-	
+#error will occur if one of the parameters is in the wrong range
 class WrongParametersForDAC(Exception):
 	def __init__(self, wrongParam, rangeLow, rangeHigh):
 		self.wrongParam = wrongParam
